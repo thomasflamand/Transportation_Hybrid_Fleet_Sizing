@@ -1,33 +1,17 @@
-# Columbia Evening Shuttle — Hybrid Fleet Sizing
+# 🚌 Columbia Evening Shuttle — Hybrid Fleet Sizing
 
-> IEOR 4418 · Transportation Analytics & Logistics · Columbia University  
-> J. Ling, T. Flamand, S. Sheng, A. Huang, M. Zhang
-
-Combines an **M/M/s queueing model** with an **agent-based simulation** (STARS) to determine optimal driver staffing levels for the Columbia Evening Shuttle, using historical ride-request data from October 2025.
+> **IEOR 4418: Transportation Analytics & Logistics — Final Project**
+> Columbia University | J. Ling, T. Flamand, S. Sheng, A. Huang, M. Zhang | October 2025
 
 ---
 
-## Table of Contents
+## 📋 Overview
 
-- [Data Availability](#data-availability)
-- [Repository Structure](#repository-structure)
-- [Methodology](#methodology)
-  - [M/M/s Queueing Model](#1-mms-queueing-model)
-  - [STARS – Agent-Based Simulation](#2-stars--agent-based-simulation)
-- [Results](#results)
-- [Citation](#citation)
+This project combines an **M/M/s queueing model** with an **agent-based simulation** (STARS) to determine optimal driver staffing levels for the Columbia Evening Shuttle, using historical ride-request data from October 2025.
 
 ---
 
-## Data Availability
-
-> **The raw trip data is not included in this repository.**
-
-Historical ride-request records were provided by the Columbia Shuttle service (operated via [Via](https://ridewithvia.com)) under a data-sharing agreement for academic research only. Redistribution is prohibited by Columbia University's data governance policy.
-
----
-
-## Repository Structure
+## 📂 Repository Structure
 
 ```
 Columbia_Shuttle/
@@ -41,9 +25,9 @@ Columbia_Shuttle/
 │   ├── mms_model.py        # Erlang-C metrics per weekday–hour slot
 │   └── threshold.py        # Exponential fit + closed-form x_β formula
 ├── analysis/
-│   ├── figures.py          # Figures 1 & 2: fleet size and shift duration
+│   ├── figures.py          # Fleet size and shift duration figures
 │   └── comparison.py       # M/M/s vs. STARS side-by-side comparison
-├── data/                   # ← NOT included (confidential, see above)
+├── data/                   # ← NOT included (confidential, see Data Availability)
 │   └── .gitkeep
 ├── logs/                   # Simulation CSV outputs (auto-generated at runtime)
 ├── requirements.txt
@@ -52,35 +36,39 @@ Columbia_Shuttle/
 
 ---
 
-## Methodology
+## 🗄️ Data Availability
 
-### 1. M/M/s Queueing Model
+> **The raw trip data is not included in this repository.**
 
-Each weekday–hour slot *(d, h)* is modelled as an independent **M/M/s queue** with:
-
-- **λ_{d,h}**: Poisson arrival rate, estimated from normalised October 2025 request counts.
-- **μ_{d,h}**: Exponential service rate = 1 / mean trip duration in the same slot.
-- **Offered load** `a = λ/μ`, **utilisation per server** `ρ = a/m` (stability: ρ < 1).
-
-The Erlang-C formula yields `P_wait` and `L_q`; Little's Law gives `W_q` (queue wait) and `W` (total time in system).
-
-**Staffing threshold.** Because `W_q(s)` has no closed-form inverse, an exponential is fitted to the discrete curve:
-
-```
-W(x) = a · exp(−b·x) + c
-```
-
-The smallest fleet size at which each additional driver reduces wait by less than β is then:
-
-```
-x_β = ⌈ (1/b) · ln( a(e^b(1−β) − 1) / (β·c) ) ⌉
-```
-
-At β = 5%, thresholds range from **22–33 drivers** depending on day and hour.
+Historical ride-request records were provided by the Columbia Shuttle service (operated via [Via](https://ridewithvia.com)) under a data-sharing agreement for academic research only. Redistribution is prohibited by Columbia University's data governance policy.
 
 ---
 
-### 2. STARS – Agent-Based Simulation
+## 🧮 Models
+
+### Part 1 — M/M/s Queueing Model
+
+Each weekday–hour slot *(d, h)* is modelled as an independent **M/M/s queue** with:
+
+- $\lambda_{d,h}$: Poisson arrival rate, estimated from normalised October 2025 request counts.
+- $\mu_{d,h}$: Exponential service rate $= 1 /$ mean trip duration in the same slot.
+- **Offered load** $a = \lambda / \mu$, **utilisation per server** $\rho = a / s$ (stability: $\rho < 1$).
+
+The **Erlang-C formula** yields $P_{\text{wait}}$ and $L_q$; Little's Law gives $W_q$ (queue wait) and $W$ (total time in system).
+
+**Staffing threshold.** Because $W_q(s)$ has no closed-form inverse, an exponential is fitted to the discrete curve:
+
+$$W(x) = a \cdot e^{-bx} + c$$
+
+The smallest fleet size at which each additional driver reduces wait by less than $\beta$ is then:
+
+$$x_\beta = \left\lceil \frac{1}{b} \cdot \ln\!\left( \frac{a\left(e^{b(1-\beta)} - 1\right)}{\beta \cdot c} \right) \right\rceil$$
+
+At $\beta = 5\%$, thresholds range from **22–33 drivers** depending on day and hour.
+
+---
+
+### Part 2 — STARS: Agent-Based Simulation
 
 STARS embeds driver and passenger agents on the real **Manhattan road network** (OpenStreetMap via NetworkX/osmnx), relaxing the spatial-homogeneity assumptions of the queueing model.
 
@@ -98,13 +86,13 @@ STARS embeds driver and passenger agents on the real **Manhattan road network** 
 
 For each candidate assignment, the simulator solves a MILP via Gurobi:
 
-```
-min  Σ d_ij · x_ij
-s.t. flow conservation (open path from driver location)
-     pickup precedes dropoff for every request k
-     vehicle load ≤ capacity C at all nodes
-     existing passengers' in-system time not increased by > 20%
-```
+$$\min \sum_{i,j} d_{ij} \cdot x_{ij}$$
+
+subject to:
+- Flow conservation (open path from driver location)
+- Pickup precedes dropoff for every request $k$
+- Vehicle load $\leq$ capacity $C$ at all nodes
+- Existing passengers' in-system time not increased by more than 20%
 
 A route is accepted only if all constraints are satisfied. The feasible driver offering the earliest pickup time wins the greedy dispatch.
 
@@ -130,50 +118,75 @@ The disproportionate gap in wait (vs. service) time indicates that the simulator
 
 ---
 
-## Results
+## 📊 Results
 
 ### Fleet size vs. average wait time
 
 Fitted on the busiest hour of the week (Oct 9, 20:00–20:59, 218 requests):
 
-```
-W(x) = 3.792 · exp(−0.0949·x) + 0.838    R² = 0.977
-```
+$$W(x) = 3.792 \cdot e^{-0.0949\,x} + 0.838 \qquad R^2 = 0.977$$
 
-- `x_{β=5%}  = 15 drivers` — diminishing-returns threshold
-- `x_{β=1%}  = 39 drivers` — near-zero marginal benefit
+| Threshold | Fleet size |
+|---|---|
+| $x_{\beta=5\%}$ (diminishing-returns threshold) | **15 drivers** |
+| $x_{\beta=1\%}$ (near-zero marginal benefit) | **39 drivers** |
 
 Wait time falls sharply between 15 and 25 drivers, then flattens near 30.
-
 
 ### Shift duration vs. average wait time
 
 Fitted on Oct 6, 18:00–22:59 (power-law model):
 
-```
-W(x) = −0.499 · x^(−2.721) + 3.831       R² = 0.995
-```
+$$W(x) = -0.499 \cdot x^{-2.721} + 3.831 \qquad R^2 = 0.995$$
 
 Wait time rises sharply from 1-hour to 2-hour shifts, then plateaus. Shifts beyond 2 hours primarily add route carryover without throughput gains.
-
 
 ### M/M/s vs. STARS comparison
 
 The queueing model consistently **underestimates required staffing** — it assumes instantaneous pickup and ignores routing delays, geographic imbalance, and batching overhead. It provides an optimistic lower bound; STARS captures the higher fleet levels needed in practice.
 
+---
+
+## ⚙️ Setup & Requirements
+
+```bash
+pip install networkx osmnx gurobipy pandas numpy
+```
+
+A valid **Gurobi license** is required. Academic licenses are available free at [gurobi.com](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
 ---
 
-## Citation
+## 🚀 Usage
+
+```bash
+python stars/simulation.py       # Run agent-based simulation
+python mms/mms_model.py          # Compute Erlang-C metrics
+python analysis/comparison.py    # Generate M/M/s vs. STARS comparison
+```
+
+---
+
+## 🔬 Technical Highlights
+
+- **M/M/s queueing** with Erlang-C formula and closed-form staffing threshold $x_\beta$
+- **MILP routing** via Gurobi with precedence and capacity constraints
+- **Agent-based simulation** on real OSM road network (NetworkX/osmnx)
+- **Exponential and power-law curve fitting** for fleet-size and shift-duration analyses
+- **Calibration against 2,025 real trips** for comparative validity assessment
+
+---
+
+## 📄 Citation
 
 ```bibtex
 @techreport{ling2025shuttle,
   title   = {A Hybrid Approach to Rideshare Fleet Sizing:
              Integrating M/M/s Queueing Models with Agent-Based Simulation},
-  author  = {Jiahe Ling, Thomas Flamand, Sarah Sheng, Alina Huang, and Michael Zhang},
+  author  = {Jiahe Ling, Thomas Flamand, Sarah Sheng, Alina Huang, Michael Zhang},
   year    = {2025},
   institution = {Department of Industrial Engineering and Operations Research,
                  Columbia University},
-  note    = {IEOR 4418 -- Transportation Analytics \& Logistics}
+  note    = {IEOR 4418 -- Transportation Analytics & Logistics}
 }
 ```
