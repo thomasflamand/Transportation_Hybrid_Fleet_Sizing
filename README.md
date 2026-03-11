@@ -126,8 +126,8 @@ Fitted on the busiest hour of the week (Oct 9, 20:00–20:59, 218 requests):
 
 $$W(x) = 3.792 \cdot e^{-0.0949\,x} + 0.838 \qquad R^2 = 0.977$$
 
-$x_{\beta=5\%}$ — diminishing-returns threshold → **15 drivers**
-$x_{\beta=1\%}$ — near-zero marginal benefit → **39 drivers**
+- $x_{\beta}$ at 5% — diminishing-returns threshold → **15 drivers**
+- $x_{\beta}$ at 1% — near-zero marginal benefit → **39 drivers**
 
 Wait time falls sharply between 15 and 25 drivers, then flattens near 30.
 
