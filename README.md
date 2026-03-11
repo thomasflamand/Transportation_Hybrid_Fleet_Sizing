@@ -25,11 +25,6 @@ Combines an **M/M/s queueing model** with an **agent-based simulation** (STARS) 
 
 Historical ride-request records were provided by the Columbia Shuttle service (operated via [Via](https://ridewithvia.com)) under a data-sharing agreement for academic research only. Redistribution is prohibited by Columbia University's data governance policy.
 
-To reproduce results, authorized users should:
-1. Request data access through Columbia's IEOR department or the shuttle operator.
-2. Place the raw CSV exports in the `data/` directory.
-3. Run preprocessing scripts before launching the simulation or the queueing model.
-
 ---
 
 ## Repository Structure
@@ -178,8 +173,7 @@ The queueing model consistently **underestimates required staffing** — it assu
 @techreport{ling2025shuttle,
   title   = {A Hybrid Approach to Rideshare Fleet Sizing:
              Integrating M/M/s Queueing Models with Agent-Based Simulation},
-  author  = {Ling, Jiahe and Flamand, Thomas and Sheng, Sarah
-             and Huang, Alina and Zhang, Michael},
+  author  = {Jiahe Ling, Thomas Flamand, Sarah Sheng, Alina Huang, and Michael Zhang},
   year    = {2025},
   institution = {Department of Industrial Engineering and Operations Research,
                  Columbia University},
