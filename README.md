@@ -145,7 +145,6 @@ W(x) = 3.792 · exp(−0.0949·x) + 0.838    R² = 0.977
 
 Wait time falls sharply between 15 and 25 drivers, then flattens near 30.
 
-![Fleet size vs. wait time](analysis/figures/fig1_fleet_size.png)
 
 ### Shift duration vs. average wait time
 
@@ -157,13 +156,11 @@ W(x) = −0.499 · x^(−2.721) + 3.831       R² = 0.995
 
 Wait time rises sharply from 1-hour to 2-hour shifts, then plateaus. Shifts beyond 2 hours primarily add route carryover without throughput gains.
 
-![Shift duration vs. wait time](analysis/figures/fig2_shift_duration.png)
 
 ### M/M/s vs. STARS comparison
 
 The queueing model consistently **underestimates required staffing** — it assumes instantaneous pickup and ignores routing delays, geographic imbalance, and batching overhead. It provides an optimistic lower bound; STARS captures the higher fleet levels needed in practice.
 
-![Waiting time vs. staffing by weekday](analysis/figures/fig3_weekday_staffing.png)
 
 ---
 
